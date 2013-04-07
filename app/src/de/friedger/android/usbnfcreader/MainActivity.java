@@ -1,5 +1,12 @@
 package de.friedger.android.usbnfcreader;
 
+import java.util.Date;
+
+import com.apiomat.frontend.ApiomatRequestException;
+import com.apiomat.frontend.Datastore;
+import com.apiomat.frontend.basics.MemberModel;
+import com.apiomat.frontend.callbacks.AOMEmptyCallback;
+
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -7,6 +14,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import de.friedger.android.usbnfcreader.io.AttachedDeviceHandler;
@@ -37,7 +45,7 @@ public class MainActivity extends Activity implements VoteListener {
 
 		Intent intent = getIntent();
 		attachedDeviceHandler = new AttachedDeviceHandler(this, nfcVoteManager);
-
+		initMember();
 		try {
 			attachedDeviceHandler.handleIntent(intent);
 			mTextView.setText("OK");
@@ -80,6 +88,9 @@ public class MainActivity extends Activity implements VoteListener {
 	}
 
 	public int[] storeVote(Vote vote) {
+		storeVoteInBackend(vote);
+		
+		
 		SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
 		ContentValues values = new ContentValues();
@@ -115,8 +126,57 @@ public class MainActivity extends Activity implements VoteListener {
 		return counts;
 	}
 
+	private void storeVoteInBackend(Vote v) {
+		
+		com.apiomat.frontend.voteplusmain.Vote backendVote =new com.apiomat.frontend.voteplusmain.Vote();
+	backendVote.setMyVote(new Long(v.getVoteType().ordinal()));
+	backendVote.setRoomNumber(v.getRoomId());
+	backendVote.setVoterId(v.getId());
+	backendVote.setVoteTime(new Date(v.getTimestamp()));
+	
+		backendVote.saveAsync(new AOMEmptyCallback() {
+			
+			@Override
+			public void isDone(ApiomatRequestException exception) {
+		//		Log.DEB// TODO Auto-generated method stub
+				
+			}
+		});
+	
+	}
+
+	private void initMember() {
+		final MemberModel member = new MemberModel();
+		member.setUserName("superVoter");
+		member.setPassword("secret");
+		Datastore.configure( member );
+		Log.d("backend", "starting");
+			member.loadMeAsync(new AOMEmptyCallback() {
+				
+				@Override
+				public void isDone(ApiomatRequestException exception) {
+					Log.d("backend", "loadMe done + exception " + exception);
+					
+					if(exception!=null)
+						{
+						member.saveAsync(null);
+						}
+					
+				}
+			});
+
+	}
+
 	public void onButtonClick(View target) {
 		finish();
+	}
+	
+	public void onButtonPlusClick(View target) {
+		onVote(new Vote(VoteType.POSITIVE,"123","myroom",System.currentTimeMillis()));
+	}
+	
+	public void onButtonMinusClick(View target) {
+		onVote(new Vote(VoteType.NEGATIVE,"123","myroom",System.currentTimeMillis()));
 	}
 
 	@Override

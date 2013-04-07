@@ -20,5 +20,23 @@
         android:layout_centerHorizontal="true"
         android:onClick="onButtonClick"
         android:text="Close app" />
+    
+     <Button
+        android:id="@+id/buttonplus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/button1"
+        android:layout_centerHorizontal="true"
+        android:onClick="onButtonPlusClick"
+        android:text="+vote" />
+     
+      <Button
+        android:id="@+id/buttonminus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/buttonplus"
+        android:layout_centerHorizontal="true"
+        android:onClick="onButtonMinusClick"
+        android:text="-vote" />
 
 </RelativeLayout>
