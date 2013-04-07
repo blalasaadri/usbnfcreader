@@ -17,14 +17,18 @@ public class AntVoteManager implements VoteManager, ButtonListener {
 		clickerService.setListener(this);
 	}
 
+	public void onResume() {
+		clickerService.onResume();
+	}
+
 	@Override
 	public void onStop() {
 		clickerService.onPause();
 	}
 
 	@Override
-	public void onButtonPressed(VoteType voteType) {
-		listener.onVote(new Vote(voteType, "demo-clicker", "some-room", System.currentTimeMillis()));
+	public void onButtonPressed(int serialNumber, VoteType voteType) {
+		listener.onVote(new Vote(voteType, "ant-remote-" + serialNumber, "some-room", System.currentTimeMillis()));
 	}
 
 }

@@ -4,5 +4,5 @@ import de.friedger.android.usbnfcreader.vote.VoteType;
 
 public interface ButtonListener {
 
-	void onButtonPressed(VoteType voteType);
+	void onButtonPressed(int serialNumber, VoteType voteType);
 }

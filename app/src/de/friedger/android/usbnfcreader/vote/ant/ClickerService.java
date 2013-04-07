@@ -1,6 +1,7 @@
 package de.friedger.android.usbnfcreader.vote.ant;
 
 import android.content.Context;
+import android.util.Log;
 import com.dsi.ant.plugins.AntPluginMsgDefines;
 import com.dsi.ant.plugins.AntPluginPcc;
 import com.dsi.ant.plugins.antplus.pcc.AntPlusControlsPcc;
@@ -8,8 +9,10 @@ import de.friedger.android.usbnfcreader.vote.VoteType;
 
 public class ClickerService {
 
+	private static final String TAG = "ClickerService";
 	private static final int DEVICE_AUTO = 0;
 
+	private final Context context;
 	private final AntPluginPcc.IPluginAccessResultReceiver<AntPlusControlsPcc> resultReceiver;
 	private final AntPluginPcc.IDeviceStateChangeReceiver stateReceiver;
 	private final AntPlusControlsPcc.IGenericCommandReceiver commandReceiver;
@@ -17,10 +20,10 @@ public class ClickerService {
 	private AntPlusControlsPcc controller;
 
 	public ClickerService(Context context) {
+		this.context = context;
 		this.resultReceiver = new AntResultReceiver();
 		this.stateReceiver = new AntStateReceiver();
 		this.commandReceiver = new AntCommandReceiver();
-		AntPlusControlsPcc.requestAccessGenericMode(context, resultReceiver, stateReceiver, commandReceiver, DEVICE_AUTO);
 	}
 
 	public void setListener(ButtonListener listener) {
@@ -28,6 +31,7 @@ public class ClickerService {
 	}
 
 	public void onResume() {
+		AntPlusControlsPcc.requestAccessGenericMode(context, resultReceiver, stateReceiver, commandReceiver, DEVICE_AUTO);
 	}
 
 	public void onPause() {
@@ -37,9 +41,9 @@ public class ClickerService {
 		}
 	}
 
-	private void fireListener(VoteType voteType) {
+	private void fireListener(int serialNumber, VoteType voteType) {
 		if (listener != null) {
-			listener.onButtonPressed(voteType);
+			listener.onButtonPressed(serialNumber, voteType);
 		}
 	}
 
@@ -71,10 +75,10 @@ public class ClickerService {
 			switch(commandNumber)
 			{
 				case AntPlusControlsPcc.GenericCommandNumber.MENU_UP:
-					fireListener(VoteType.POSITIVE);
+					fireListener(serialNumber, VoteType.POSITIVE);
 					break;
 				case AntPlusControlsPcc.GenericCommandNumber.MENU_DOWN:
-					fireListener(VoteType.NEGATIVE);
+					fireListener(serialNumber, VoteType.NEGATIVE);
 					break;
 				case AntPlusControlsPcc.GenericCommandNumber.MENU_SELECT:
 				case AntPlusControlsPcc.GenericCommandNumber.MENU_BACK:
@@ -86,8 +90,7 @@ public class ClickerService {
 				case AntPlusControlsPcc.GenericCommandNumber.LAP:
 				case AntPlusControlsPcc.GenericCommandNumber.NO_COMMAND:
 				default:
-					break;
-//					return AntPlusControlsPcc.CommandStatus.REJECTED;
+					return AntPlusControlsPcc.CommandStatus.REJECTED;
 			}
 			return AntPlusControlsPcc.CommandStatus.PASS;
 		}

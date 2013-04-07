@@ -54,6 +54,18 @@ public class MainActivity extends Activity implements VoteListener {
 		}
 	}
 
+	@Override
+	protected void onResume() {
+		super.onResume();
+		antVoteManager.onResume();
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		antVoteManager.onStop();
+	}
+
 	private void initUi() {
 		setContentView(R.layout.activity_main);
 		mTextView = (TextView) findViewById(R.id.textview);
@@ -176,7 +188,7 @@ public class MainActivity extends Activity implements VoteListener {
 	}
 	
 	public void onButtonMinusClick(View target) {
-		onVote(new Vote(VoteType.NEGATIVE,"123","myroom",System.currentTimeMillis()));
+		onVote(new Vote(VoteType.NEGATIVE, "123", "myroom", System.currentTimeMillis()));
 	}
 
 	@Override
@@ -184,7 +196,6 @@ public class MainActivity extends Activity implements VoteListener {
 		super.onStop();
 		attachedDeviceHandler.onStop();
 		nfcVoteManager.onStop();
-        antVoteManager.onStop();
 	}
 
 	public void beepTwice() {
