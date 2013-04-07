@@ -4,10 +4,10 @@ import de.friedger.android.usbnfcreader.io.TagListener;
 
 public class VotingMachine implements TagListener {
 
-	private VoteManager voteManager;
+	private NfcVoteManager voteManager;
 	private VoteType voteType = VoteType.UNDEFINED;
 
-	public VotingMachine(VoteManager voteManager) {
+	public VotingMachine(NfcVoteManager voteManager) {
 		this.voteManager = voteManager;		
 	}
 	

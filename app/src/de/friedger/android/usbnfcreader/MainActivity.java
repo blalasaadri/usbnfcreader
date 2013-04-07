@@ -1,8 +1,5 @@
 package de.friedger.android.usbnfcreader;
 
-import com.dsi.ant.AntInterface;
-import com.dsi.ant.exception.AntInterfaceException;
-
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -10,28 +7,25 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import de.friedger.android.usbnfcreader.io.AttachedDeviceHandler;
 import de.friedger.android.usbnfcreader.io.UsbConnectionException;
+import de.friedger.android.usbnfcreader.vote.NfcVoteManager;
 import de.friedger.android.usbnfcreader.vote.Vote;
 import de.friedger.android.usbnfcreader.vote.VoteDbHelper;
 import de.friedger.android.usbnfcreader.vote.VoteListener;
-import de.friedger.android.usbnfcreader.vote.VoteManager;
 import de.friedger.android.usbnfcreader.vote.VoteType;
+import de.friedger.android.usbnfcreader.vote.ant.AntVoteManager;
 
 public class MainActivity extends Activity implements VoteListener {
 
-	private VoteManager voteManager;
+	private NfcVoteManager nfcVoteManager;
+    private AntVoteManager antVoteManager;
 	private TextView mTextView;
 	private Beeper beeper;
 	private AttachedDeviceHandler attachedDeviceHandler;
 	private VoteDbHelper mDbHelper;
-	private AntInterface antInterface;
-	
-	public static final String TAG = "vote+";
-	private boolean antServiceConnected = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -39,21 +33,16 @@ public class MainActivity extends Activity implements VoteListener {
 		mDbHelper = new VoteDbHelper(this);
 
 		initUi();
-		initVoteManager();
+		initVoteManagers();
 
 		Intent intent = getIntent();
-		attachedDeviceHandler = new AttachedDeviceHandler(this, voteManager);
+		attachedDeviceHandler = new AttachedDeviceHandler(this, nfcVoteManager);
 
 		try {
 			attachedDeviceHandler.handleIntent(intent);
 			mTextView.setText("OK");
 		} catch (UsbConnectionException e) {
 			mTextView.setText(e.getMessage());
-		}
-		
-		antInterface = new AntInterface();
-		if(! antInterface.initService(this, antServiceListener)) {
-			Log.e(MainActivity.TAG, "ANT+ could not be initialized");
 		}
 	}
 
@@ -63,8 +52,9 @@ public class MainActivity extends Activity implements VoteListener {
 		beeper = new Beeper(this);
 	}
 
-	private void initVoteManager() {
-		voteManager = new VoteManager("undefined", this);
+	private void initVoteManagers() {
+		nfcVoteManager = new NfcVoteManager("undefined", this);
+        antVoteManager = new AntVoteManager(this);
 	}
 
 	@Override
@@ -132,16 +122,11 @@ public class MainActivity extends Activity implements VoteListener {
 	}
 
 	@Override
-	protected void onPause() {
-		super.onPause();
-		antInterface.releaseService();
-	}
-	
-	@Override
 	protected void onStop() {
 		super.onStop();
 		attachedDeviceHandler.onStop();
-		voteManager.onStop();
+		nfcVoteManager.onStop();
+        antVoteManager.onStop();
 	}
 
 	public void beepTwice() {
@@ -149,30 +134,4 @@ public class MainActivity extends Activity implements VoteListener {
 		t.start();
 	}
 	
-	/**
-	 * Code specific to ANT+
-	 */
-	private AntInterface.ServiceListener antServiceListener = new AntInterface.ServiceListener()
-    {
-		public void onServiceConnected()
-        {
-			Log.d(TAG, "antServiceListener onServiceConnected()");
-			
-			antServiceConnected = true;
-			
-			try
-            {
-				// TODO This is just so it compiles
-				throw new AntInterfaceException();
-            } catch(AntInterfaceException e) {
-            	
-            }
-			//TODO
-        }
-		
-		public void onServiceDisconnected()
-        {
-			//TODO
-        }
-    };
 }

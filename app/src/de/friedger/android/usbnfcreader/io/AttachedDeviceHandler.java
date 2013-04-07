@@ -14,16 +14,16 @@ import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
 import android.util.Log;
 import de.friedger.android.usbnfcreader.Constants;
-import de.friedger.android.usbnfcreader.vote.VoteManager;
+import de.friedger.android.usbnfcreader.vote.NfcVoteManager;
 
 public class AttachedDeviceHandler {
 
 	private Context context;
-	private VoteManager voteManager;
+	private NfcVoteManager voteManager;
 	private UsbManager usbManager;
 	private Set<PermissionBroadcastReceiver> broadcastReceivers = new HashSet<PermissionBroadcastReceiver>();
 
-	public AttachedDeviceHandler(Context context, VoteManager voteManager) {
+	public AttachedDeviceHandler(Context context, NfcVoteManager voteManager) {
 		this.context = context;
 		this.voteManager = voteManager;
 		usbManager = (UsbManager)context.getSystemService(Context.USB_SERVICE);
