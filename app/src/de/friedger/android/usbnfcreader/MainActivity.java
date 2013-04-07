@@ -54,7 +54,7 @@ public class MainActivity extends Activity implements VoteListener {
 
 	private void initVoteManagers() {
 		nfcVoteManager = new NfcVoteManager("undefined", this);
-        antVoteManager = new AntVoteManager(this);
+        antVoteManager = new AntVoteManager(this, this);
 	}
 
 	@Override
@@ -77,8 +77,6 @@ public class MainActivity extends Activity implements VoteListener {
 				}
 			}
 		});
-		// blink(vote.getVoteType());
-		
 	}
 
 	public int[] storeVote(Vote vote) {
